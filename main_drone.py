@@ -5,7 +5,7 @@ from random import randint, random
 def main_drone(x_base, y_base, x_max, y_max, nb_drone, speed_drone, high_drone, dt, delivery_time, time_wait_base, time_tot_simu):
     base = LaunchingBase(nb_drone, x_base, y_base, speed_drone, high_drone, x_max, y_max, delivery_time, dt, time_wait_base)
 
-    for i in range(time_tot//dt):
+    for i in range(time_tot_simu//dt):
         if random() < 0.4:
             base.new_command(randint(0, x_max), randint(0, y_max))
         base.launch_order()
