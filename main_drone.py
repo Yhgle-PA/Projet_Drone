@@ -7,7 +7,7 @@ def main_drone(x_base, y_base, x_max, y_max, nb_drone, speed_drone, high_drone, 
 
     for i in range(time_tot_simu//dt):
         if random() < 1:
-            base.new_command(randint(0, x_max), randint(0, y_max))
+            base.new_order(randint(0, x_max), randint(0, y_max))
         base.launch_order()
         base.move_all()
         base.check_arrived_order()

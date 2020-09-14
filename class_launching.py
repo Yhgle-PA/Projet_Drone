@@ -37,7 +37,7 @@ class LaunchingBase():
                     boolean = True
                     break
 
-    def new_command(self, dest_x, dest_y):
+    def new_order(self, dest_x, dest_y):
         self.list_order.append(Order(dest_x, dest_y))
 
     def check_arrived_order(self):
