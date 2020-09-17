@@ -5,23 +5,25 @@ import numpy as np
 
 
 class LaunchingBase():
-    def __init__(self, nb_drone, x, y, speed, high, x_max, y_max, delivery_time, dt, time_wait_base):
-        self.x = x
-        self.y = y
-        self.list_drone = [Drone(speed, high, x, y, delivery_time) for _ in range(nb_drone)]
+    def __init__(self, dict_setup):
+        self.x = dict_setup["x_base"]
+        self.y = dict_setup["y_base"]
+        self.list_drone = [Drone(dict_setup) for _ in range(dict_setup["nb_drone"])]
         self.list_order = []
         self.list_order_flying = []
         self.list_order_done = []
-        self.dt = dt
-        self.time_wait_base = time_wait_base
+        self.dt = dict_setup["dt"]
+        self.time_wait_base = dict_setup["time_wait_base"]
+        self.recharge_power = dict_setup["recharge_power"]
+        self.energy_tot_consumed = dict_setup["cap_bat"]*dict_setup["nb_drone"]
 
         plt.show()
         self.axes = plt.gca()
-        self.axes.set_xlim(0, x_max)
-        self.axes.set_ylim(0, y_max)
-        self.axes.plot(x, y, 'r+', markersize=40)
+        self.axes.set_xlim(0, dict_setup["x_max"])
+        self.axes.set_ylim(0, dict_setup["y_max"])
+        self.axes.plot(self.x, self.y, 'r+', markersize=40)
         img = plt.imread('lyon.PNG')
-        self.axes.imshow(img, alpha=0.5, extent=[0, x_max, 0, y_max])
+        self.axes.imshow(img, alpha=0.5, extent=[0, dict_setup["x_max"], 0, dict_setup["y_max"]])
         self.line, = self.axes.plot([], [], '*')
 
     def launch_order(self):
@@ -31,6 +33,7 @@ class LaunchingBase():
             boolean = False
             for drone in self.list_drone:
                 if drone.state == 'Base' and (drone.time_waiting_base is None or drone.time_waiting_base <= 0):
+                    # Check if there is a free drone to begin the delivery
                     drone.begin_order(order)
                     del self.list_order[0]
                     self.list_order_flying.append(order)
@@ -42,12 +45,18 @@ class LaunchingBase():
 
     def check_arrived_order(self):
         for drone in self.list_drone:
-            if drone.state == 'Base' and drone.order is not None:
+            if drone.state == 'Back' and drone.order is not None:
+                # The order is delivered
                 ind_order = self.list_order_flying.index(drone.order)
                 self.list_order_done.append(self.list_order_flying[ind_order])
                 del self.list_order_flying[ind_order]
                 drone.order = None
-                drone.time_waiting_base = self.time_wait_base
+            elif drone.state == 'Back to Base':
+                # Back to base, we calcul the time to recharge the drone
+                drone.time_waiting_base = self.time_wait_base + (drone.cap_bat - drone.cap_bat_act)/self.recharge_power*3600
+                self.energy_tot_consumed += drone.cap_bat - drone.cap_bat_act
+                drone.cap_bat_act = drone.cap_bat
+                drone.state = 'Base'
 
     def move_all(self):
         for drone in self.list_drone:
