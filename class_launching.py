@@ -65,8 +65,8 @@ class LaunchingBase():
         for order_waiting in self.list_order:
             order_waiting.waiting_order(self.dt)
 
-    def plot_drone(self, nb_seconds):
-        self.axes.set_title(f'{nb_seconds} seconds \n {len(self.list_order)} orders waiting \n {len(self.list_order_flying)} orders flying \n {len(self.list_order_done)} orders done')
+    def plot_drone(self, time):
+        self.axes.set_title(f'{time//3600}h{(time%3600)//60}min{time%60}s \n {len(self.list_order)} orders waiting \n {len(self.list_order_flying)} orders flying \n {len(self.list_order_done)} orders done')
         xdata = np.array([drone.x for drone in self.list_drone])
         ydata = np.array([drone.y for drone in self.list_drone])
         self.line.set_xdata(xdata)
