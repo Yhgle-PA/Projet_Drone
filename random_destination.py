@@ -14,4 +14,4 @@ class RandomDestination:
     def random(self):
         r = np.random.choice(self.density.shape[0], p=self.density)
         y, x = np.unravel_index(r, self.shape)
-        return x*self.xscale, (self.shape[0]-y)*self.yscale
+        return int(x*self.xscale), int((self.shape[0]-y)*self.yscale)

@@ -14,6 +14,7 @@ class Drone():
         self.horizontal_speed = dict_setup["horizontal_speed"]
         self.vertical_speed = dict_setup["vertical_speed"]
         self.height_flight = dict_setup["height_flight"]
+        self.weight = dict_setup["weight_drone"]
         self.state = 'Base'
         self.delivery_time = dict_setup["delivery_time"]
         self.timer_delivery = None
@@ -30,6 +31,7 @@ class Drone():
         self.order = None
         self.dest_x = None
         self.dest_y = None
+        self.weight_order = 0
 
     def move(self, dt):
         if self.cap_bat < 0:
@@ -43,6 +45,7 @@ class Drone():
                 self.dest_x = self.base_x
                 self.dest_y = self.base_y
                 self.order.time_delivery += self.flying_time + self.delivery_time
+                self.weight = 0
 
         elif self.state == 'Go' or self.state == 'Back':
             self.flying_time += dt
@@ -64,6 +67,10 @@ class Drone():
 
                 move_y = np.sign(dy) * min(abs(dy), self.horizontal_speed*dt_y)
                 self.y += move_y
+                if abs(self.x - self.dest_x) <= 0.001 and abs(self.y - self.dest_y) <= 0.001:
+                    # If it's at less than 1cm of the destination
+                    self.x = self.dest_x
+                    self.y = self.dest_y
 
             elif self.x == self.dest_x and self.y == self.dest_y and self.height != 0:
                 # Vertical landing
@@ -71,6 +78,9 @@ class Drone():
                 dh = -self.height
                 move_h = min(dh, self.vertical_speed*dt)
                 self.height += move_h
+                if self.height <= 0.001:
+                    # If it's almost landed
+                    self.height = 0
 
             elif self.height != self.height_flight:
                 # Vertical lift off
@@ -78,6 +88,9 @@ class Drone():
                 dh = self.height_flight - self.height
                 move_h = min(dh, self.vertical_speed*dt)
                 self.height += move_h
+                if self.height_flight - self.height <= 0.001:
+                    # If it's almost at the good height flight
+                    self.height = self.height_flight
 
             else:
                 print(self.height, self.x, self.y, self.dest_x, self.dest_y)
@@ -99,5 +112,6 @@ class Drone():
         self.order = order
         self.dest_x = order.x
         self.dest_y = order.y
+        self.weight_order = order.weight
         self.state = 'Go'
         self.flying_time = 0

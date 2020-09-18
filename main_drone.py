@@ -19,8 +19,8 @@ def main_drone(dict_setup):
             while abs(x - dict_setup["x_base"]) < 5 and abs(y - dict_setup["y_max"]) < 5:
                 x, y = destinations.random()
 
-            weigth = np.around(uniform(0.1, 3.6), 2)
-            base.new_order(x, y, weigth)
+            weight = np.around(uniform(dict_setup["range_weight"][0], dict_setup["range_weight"][1]), 2)
+            base.new_order(x, y, weight)
 
         base.launch_order()
         base.move_all()
