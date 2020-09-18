@@ -1,7 +1,8 @@
 from class_launching import LaunchingBase
 from random_destination import RandomDestination
-from random import random
+from random import random, uniform
 import json
+import numpy as np
 
 
 def main_drone(dict_setup):
@@ -11,7 +12,8 @@ def main_drone(dict_setup):
     for i in range(dict_setup["time_tot_simu"]//dict_setup["dt"]):
         if random() < 1:
             x, y = destinations.random()
-            base.new_order(x, y)
+            weigth = np.around(uniform(0.1, 3.6), 2)
+            base.new_order(x, y, weigth)
         base.launch_order()
         base.move_all()
         base.check_arrived_order()
