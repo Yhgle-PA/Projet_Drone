@@ -25,7 +25,7 @@ class Drone():
         self.cap_bat = dict_setup["cap_bat"]
         self.cap_bat_act = self.cap_bat
         self.horizontal_power = dict_setup["horizontal_power"]
-        self.vertical_power = dict_setup["horizontal_power"]
+        self.vertical_power = dict_setup["vertical_power"]
 
         # Order infos
         self.order = None
