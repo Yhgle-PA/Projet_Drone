@@ -25,6 +25,7 @@ def main_drone(dict_setup):
         base.launch_order()
         base.move_all()
         base.check_arrived_order()
+        base.plot_noise()
         base.plot_drone(t)
 
     print('Temps total de vol ', sum([elem.flying_time_tot for elem in base.list_drone])/3600, ' heures')

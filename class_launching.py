@@ -8,6 +8,8 @@ class LaunchingBase():
     def __init__(self, dict_setup):
         self.x = dict_setup["x_base"]
         self.y = dict_setup["y_base"]
+        self.x_max = dict_setup["x_max"]
+        self.y_max = dict_setup["y_max"]
         self.list_drone = [Drone(dict_setup) for _ in range(dict_setup["nb_drone"])]
         self.list_order = []
         self.list_order_flying = []
@@ -16,15 +18,22 @@ class LaunchingBase():
         self.time_wait_base = dict_setup["time_wait_base"]
         self.recharge_power = dict_setup["recharge_power"]
         self.energy_tot_consumed = dict_setup["cap_bat"]*dict_setup["nb_drone"]
+        self.granularity_noise = dict_setup["granularity_noise"]
 
         plt.show()
-        self.axes = plt.gca()
-        self.axes.set_xlim(0, dict_setup["x_max"])
-        self.axes.set_ylim(0, dict_setup["y_max"])
+        self.axes = plt.subplot(121)
+        self.axes.set_xlim(0, self.x_max)
+        self.axes.set_ylim(0, self.y_max)
         self.axes.plot(self.x, self.y, 'r+', markersize=40)
         img = plt.imread('lyon.PNG')
-        self.axes.imshow(img, alpha=0.5, extent=[0, dict_setup["x_max"], 0, dict_setup["y_max"]])
+        self.axes.imshow(img, alpha=0.5, extent=[0, self.x_max, 0, self.y_max])
         self.line, = self.axes.plot([], [], '*')
+
+        self.axes_noise = plt.subplot(122)
+        self.axes_noise.set_xlim(0, self.x_max)
+        self.axes_noise.set_ylim(0, self.y_max)
+        self.line_noise = self.axes_noise.imshow(np.zeros((self.y_max//self.granularity_noise, self.x_max//self.granularity_noise)), extent=[0, self.x_max, 0, self.y_max], cmap=plt.cm.RdBu, vmin=0, vmax=80)
+        plt.colorbar(self.line_noise)
 
     def launch_order(self):
         boolean = True
@@ -71,6 +80,31 @@ class LaunchingBase():
         ydata = np.array([drone.y for drone in self.list_drone])
         self.line.set_xdata(xdata)
         self.line.set_ydata(ydata)
+        plt.draw()
+        plt.pause(1e-17)
+
+    def drone_noise(self):
+        noise = np.zeros((self.y_max//self.granularity_noise, self.x_max//self.granularity_noise))
+        for i in range(self.y_max//self.granularity_noise):
+            for j in range(self.x_max//self.granularity_noise):
+                noise[i, j] = 0
+                x_obs = j*self.granularity_noise
+                y_obs = (self.y_max//self.granularity_noise - i)*self.granularity_noise
+                z_obs = 0
+                for drone in self.list_drone:
+                    x = drone.x - x_obs
+                    y = drone.y - y_obs
+                    z = drone.height
+                    if (drone.state == 'Go' or drone.state == 'Back') and np.sqrt(x*x + y*y + z*z) < 1000:
+                        noise[i, j] += drone.noise(x_obs, y_obs, z_obs)
+        noise = 20*np.log10(noise/2e-5)
+        return noise
+
+    def plot_noise(self):
+        noise = self.drone_noise()
+        self.line_noise.set_data(noise)
+        self.axes_noise.set_title(f'Max noise : {int(np.max(noise))}dB')
+
         plt.draw()
         plt.pause(1e-17)
 

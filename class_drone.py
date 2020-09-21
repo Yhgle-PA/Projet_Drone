@@ -115,3 +115,14 @@ class Drone():
         self.weight_order = order.weight
         self.state = 'Go'
         self.flying_time = 0
+
+    def noise(self, x_user, y_user, z_user):
+        x = x_user - self.x
+        y = y_user - self.y
+        z = z_user - self.height
+        r = np.sqrt(x*x + y*y + z*z)
+        theta = np.arccos(z/r)*180 / np.pi
+        phi = np.arctan2(y, x)*180 / np.pi
+
+        noise = 40/r/r
+        return noise
