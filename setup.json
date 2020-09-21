@@ -23,10 +23,10 @@
                         20, 22, 0.15,
                         22, 24, 0.05
                         ],
-    "nb_order_day": 50000,
+    "nb_order_day": 100000,
     "recharge_power": 10000,
     "cap_bat": 1000,
     "horizontal_power": 250,
     "vertical_power": 300,
-    "granularity_noise": 150
+    "granularity_noise": 100
 }

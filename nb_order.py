@@ -1,6 +1,6 @@
 def number_order(dict_setup, t):
     for i in range(0, len(dict_setup["proba_h_order"]), 3):
-        if t >= dict_setup["proba_h_order"][i]*3600 and t < dict_setup["proba_h_order"][i+1]*3600:
+        if t%86400 >= dict_setup["proba_h_order"][i]*3600 and t%86400 < dict_setup["proba_h_order"][i+1]*3600:
             nb_order = dict_setup["proba_h_order"][i+2] * dict_setup["nb_order_day"]/(dict_setup["proba_h_order"][i+1]*3600-dict_setup["proba_h_order"][i]*3600)*dict_setup["dt"]
             return int(nb_order)
 

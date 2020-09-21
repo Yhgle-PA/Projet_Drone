@@ -55,18 +55,15 @@ class Drone():
                 self.cap_bat_act -= self.horizontal_power*dt/3600
                 dx = self.dest_x - self.x
                 dy = self.dest_y - self.y
-                if dy == 0:
-                    dt_x = dt
-                    dt_y = 0
-                else:
-                    dt_x = dt * abs(dx/dy)/(1+abs(dx/dy))
-                    dt_y = dt - dt_x
-
-                move_x = np.sign(dx) * min(abs(dx), self.horizontal_speed*dt_x)
+                dxy = np.sqrt(dx*dx + dy*dy)
+                move_xy = min(dxy, self.horizontal_speed*dt)
+                factor_move = move_xy/dxy
+                move_x = dx*factor_move
                 self.x += move_x
 
-                move_y = np.sign(dy) * min(abs(dy), self.horizontal_speed*dt_y)
+                move_y = dy*factor_move
                 self.y += move_y
+
                 if abs(self.x - self.dest_x) <= 0.001 and abs(self.y - self.dest_y) <= 0.001:
                     # If it's at less than 1cm of the destination
                     self.x = self.dest_x

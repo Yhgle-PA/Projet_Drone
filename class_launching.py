@@ -75,6 +75,7 @@ class LaunchingBase():
             order_waiting.waiting_order(self.dt)
 
     def plot_drone(self, time):
+        time = time%86400
         self.axes.set_title(f'{time//3600}h{(time%3600)//60}min{time%60}s \n {len(self.list_order)} orders waiting \n {len(self.list_order_flying)} orders flying \n {len(self.list_order_done)} orders done \n {sum(1 for elem in self.list_drone if elem.state == "Base" and (elem.time_waiting_base is None or elem.time_waiting_base <= 0))} drones available')
         xdata = np.array([drone.x for drone in self.list_drone])
         ydata = np.array([drone.y for drone in self.list_drone])
@@ -104,7 +105,6 @@ class LaunchingBase():
         noise = self.drone_noise()
         self.line_noise.set_data(noise)
         self.axes_noise.set_title(f'Max noise : {int(np.max(noise))}dB')
-
         plt.draw()
         plt.pause(1e-17)
 
