@@ -89,8 +89,8 @@ class LaunchingBase():
         for i in range(self.y_max//self.granularity_noise):
             for j in range(self.x_max//self.granularity_noise):
                 noise[i, j] = 0
-                x_obs = j*self.granularity_noise
-                y_obs = (self.y_max//self.granularity_noise - i)*self.granularity_noise
+                x_obs = j*self.granularity_noise + self.granularity_noise/2
+                y_obs = (self.y_max//self.granularity_noise - i)*self.granularity_noise + self.granularity_noise/2
                 z_obs = 0
                 for drone in self.list_drone:
                     x = drone.x - x_obs
