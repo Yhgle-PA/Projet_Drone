@@ -7,3 +7,12 @@ class Order():
 
     def waiting_order(self, dt):
         self.time_delivery += dt
+        
+        
+    def to_dict(self):
+        return {
+            'x': self.x,
+            'y': self.y,
+            'time_delivery': self.time_delivery,
+            'weight': self.weight
+            }

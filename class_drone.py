@@ -78,9 +78,8 @@ class Drone():
                 dh = self.height_flight - self.height
                 move_h = min(dh, self.vertical_speed*dt)
                 self.height += move_h
-
             else:
-                print(self.height, self.x, self.y, self.dest_x, self.dest_y)
+                print(self.height, self.height_flight, self.x, self.y, self.dest_x, self.dest_y)
                 raise Exception('No cases should be there')
 
             if self.x == self.dest_x and self.y == self.dest_y and self.height == 0 and (self.state == 'Go' or self.state == 'Back'):
@@ -101,3 +100,13 @@ class Drone():
         self.dest_y = order.y
         self.state = 'Go'
         self.flying_time = 0
+        
+    
+    def to_dict(self):
+        order = self.order.to_dict() if self.order is not None else None
+        return {
+            'x': self.x,
+            'y': self.y,
+            'state': self.state,
+            'order': order
+            }
