@@ -2,6 +2,7 @@ from class_drone import Drone
 from class_order import Order
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 
 class LaunchingBase():
@@ -113,3 +114,15 @@ class LaunchingBase():
         plt.figure()
         plt.hist(list_waiting, bins=50)
         plt.show()
+        
+    def to_dict(self):
+        return {
+            'drones': [drone.to_dict() for drone in self.list_drone],
+            'orders': [order.to_dict() for order in self.list_order]
+            }
+    
+    def save_json(self, path):
+        json_text = json.dumps(self.to_dict())
+        
+        with open(path, 'w') as file:
+            file.write(json_text)
