@@ -121,5 +121,5 @@ class Drone():
         theta = np.arccos(z/r)*180 / np.pi
         phi = np.arctan2(y, x)*180 / np.pi
 
-        noise = 40/r/r
+        noise = 10/r
         return noise

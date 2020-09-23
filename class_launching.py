@@ -95,7 +95,7 @@ class LaunchingBase():
                 for drone in self.list_drone:
                     x = drone.x - x_obs
                     y = drone.y - y_obs
-                    z = drone.height
+                    z = drone.height - z_obs
                     if (drone.state == 'Go' or drone.state == 'Back') and np.sqrt(x*x + y*y + z*z) < 1000:
                         noise[i, j] += drone.noise(x_obs, y_obs, z_obs)
         noise = 20*np.log10(noise/2e-5)
