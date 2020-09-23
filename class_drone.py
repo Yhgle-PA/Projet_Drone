@@ -113,18 +113,20 @@ class Drone():
         self.state = 'Go'
         self.flying_time = 0
 
-    def noise(self, x_user, y_user, z_user):
-        x = x_user - self.x
-        y = y_user - self.y
-        z = z_user - self.height
+    def noise(self, size_x, size_y, granularity):
+        _, y_mat = np.meshgrid(np.zeros(size_x), np.arange(size_y-1, -1, -1))
+        x_mat, _ = np.meshgrid(np.arange(0, size_x), np.zeros(size_y))
+
+        x = x_mat*granularity - self.x
+        y = y_mat*granularity - self.y
+        z = np.zeros((size_y, size_x)) - self.height
         r = np.sqrt(x*x + y*y + z*z)
         theta = np.arccos(z/r)*180 / np.pi
         phi = np.arctan2(y, x)*180 / np.pi
 
-        noise = 10/r
+        noise = 0.5/r
         return noise
-        
-    
+
     def to_dict(self):
         order = self.order.to_dict() if self.order is not None else None
         return {

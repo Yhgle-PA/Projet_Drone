@@ -32,7 +32,7 @@ def main_drone(dict_setup):
     print('Energy Total ', base.energy_tot_consumed/1000, ' kWh')
 
     base.plot_waiting_order()
-    
+
     base.save_json('base.json')
 
 

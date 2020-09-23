@@ -87,18 +87,21 @@ class LaunchingBase():
 
     def drone_noise(self):
         noise = np.zeros((self.y_max//self.granularity_noise, self.x_max//self.granularity_noise))
-        for i in range(self.y_max//self.granularity_noise):
-            for j in range(self.x_max//self.granularity_noise):
-                noise[i, j] = 0
-                x_obs = j*self.granularity_noise + self.granularity_noise/2
-                y_obs = (self.y_max//self.granularity_noise - i)*self.granularity_noise + self.granularity_noise/2
-                z_obs = 0
-                for drone in self.list_drone:
-                    x = drone.x - x_obs
-                    y = drone.y - y_obs
-                    z = drone.height - z_obs
-                    if (drone.state == 'Go' or drone.state == 'Back') and np.sqrt(x*x + y*y + z*z) < 1000:
-                        noise[i, j] += drone.noise(x_obs, y_obs, z_obs)
+        # for i in range(self.y_max//self.granularity_noise):
+        #     for j in range(self.x_max//self.granularity_noise):
+        #         noise[i, j] = 0
+        #         x_obs = j*self.granularity_noise + self.granularity_noise/2
+        #         y_obs = (self.y_max//self.granularity_noise - i)*self.granularity_noise + self.granularity_noise/2
+        #         z_obs = 0
+        #         for drone in self.list_drone:
+        #             x = drone.x - x_obs
+        #             y = drone.y - y_obs
+        #             z = drone.height - z_obs
+        #             if (drone.state == 'Go' or drone.state == 'Back') and np.sqrt(x*x + y*y + z*z) < 1000:
+        #                 noise[i, j] += drone.noise(x_obs, y_obs, z_obs)
+        for drone in self.list_drone:
+            if (drone.state == 'Go' or drone.state == 'Back'):
+                noise += drone.noise(self.x_max//self.granularity_noise, self.y_max//self.granularity_noise, self.granularity_noise)
         noise = 20*np.log10(noise/2e-5)
         return noise
 
@@ -114,15 +117,15 @@ class LaunchingBase():
         plt.figure()
         plt.hist(list_waiting, bins=50)
         plt.show()
-        
+
     def to_dict(self):
         return {
             'drones': [drone.to_dict() for drone in self.list_drone],
             'orders': [order.to_dict() for order in self.list_order]
             }
-    
+
     def save_json(self, path):
         json_text = json.dumps(self.to_dict())
-        
+
         with open(path, 'w') as file:
             file.write(json_text)

@@ -28,5 +28,5 @@
     "cap_bat": 1000,
     "horizontal_power": 250,
     "vertical_power": 300,
-    "granularity_noise": 100
+    "granularity_noise": 50
 }
