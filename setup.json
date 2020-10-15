@@ -4,7 +4,7 @@
     "x_max": 16000,
     "y_max": 11500,
     "name_pict": "lyon.PNG",
-    "nb_drone": 100,
+    "nb_drone": 1000,
     "horizontal_speed": 7,
     "vertical_speed": 4,
     "height_flight": 60,
@@ -23,10 +23,10 @@
                         20, 22, 0.15,
                         22, 24, 0.05
                         ],
-    "nb_order_day": 10000,
+    "nb_order_day": 20000,
     "recharge_power": 10000,
     "cap_bat": 1000,
     "horizontal_power": 250,
     "vertical_power": 300,
-    "granularity_noise": 50
+    "granularity_noise": 75
 }
