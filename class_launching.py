@@ -24,6 +24,7 @@ class LaunchingBase():
         self.recharge_power = dict_setup["recharge_power"]
         self.energy_tot_consumed = dict_setup["cap_bat"]*dict_setup["nb_drone"]
         self.granularity_noise = dict_setup["granularity_noise"]
+        self.dist_calc_noise = dict_setup["dist_calc_noise"]
 
         plt.show()
         self.axes = plt.subplot(121)
@@ -93,7 +94,8 @@ class LaunchingBase():
         noise = np.zeros((self.y_max//self.granularity_noise, self.x_max//self.granularity_noise))
         for drone in self.list_drone:
             if (drone.state == 'Go' or drone.state == 'Back'):
-                noise += drone.noise(self.x_max//self.granularity_noise, self.y_max//self.granularity_noise, self.granularity_noise)
+                noise += drone.noise(self.x_max//self.granularity_noise, self.y_max//self.granularity_noise, self.granularity_noise, self.dist_calc_noise)
+
         noise = 10*np.log10(noise) + 120
         return noise
 

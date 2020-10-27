@@ -1,5 +1,4 @@
 import numpy as np
-from random import random
 import scipy.special
 
 
@@ -19,6 +18,9 @@ class Drone():
         self.weight = dict_setup["weight_drone"]
         self.state = 'Base'
         self.delivery_time = dict_setup["delivery_time"]
+        self.nb_pale = dict_setup["nb_pale"]
+        self.vit_rotor = dict_setup["vit_rotor"]
+        self.dict_mod_acoust = dict_setup["dict_mod_acoust"]
         self.timer_delivery = None
         self.flying_time_tot = 0
         self.time_waiting_base = None
@@ -158,9 +160,9 @@ class Drone():
 
         #                  INITIALISATION - DEFINITION SUCCINCTE DU ROTOR
         #                  **********************************************
-        B = 2              # nombre de pales du rotor
-        Gom = 4000         # vitesse de rotation du rotor en tours par minute
-        Gom = Gom*2*np.pi/60  # pulsation associée
+        B = self.nb_pale   # nombre de pales du rotor
+        Gom = self.vit_rotor    # vitesse de rotation du rotor en tours par minute
+        Gom = Gom*2*np.pi/60    # pulsation associée
         R0 = 0.15          # rayon équivalent
         M = Gom*R0/c0      # nombre de Mach tangentiel en R0
         gam = 45           # calage des pales en degrés
@@ -189,78 +191,86 @@ class Drone():
             #   Définition des harmoniques de charge
             #   ************************************
 
-            #   Ordre absolu maximal(sachant que F_(-s)=F*_(s)):
-            sm = max(abs(s1), abs(s2))
+            #   Modèle simplifié d'harmoniques de charge pour une interaction
+            #   potentielle avec un bras cylindrique. 3 paramètres ajustables:
+            ai = self.dict_mod_acoust["ai"]
+            ar = self.dict_mod_acoust["ar"]
+            b = self.dict_mod_acoust["b"]
 
-            #   OPTIONS
-            #   *******
-            ind = 2        # 1 pour modèle de Lowson, 2 pour modèle d'interaction
-            #                   potentielle avec un bras support
+            # Attention: ce modèle vaut pour un arbre de transmission aligné sur
+            # l'axe des X négatifs.
+            for ss in range(s1, s2+1):
+                if ss == 0:
+                    Fs = 5    # pour la charge stationnaire
+                else:
+                    Fs = (ar-1j*ai)*(-1)**ss*ss*np.exp(-ss/b)
 
-            F = np.zeros(sm+1)
+                arg = 0.5*c*ss/R0
+                Sears = np.exp(1j*arg*(1-0.5*np.pi*np.pi/(1+2*np.pi*arg)))/np.sqrt(complex(1+2*np.pi*arg, 0))
+                Fs = np.pi*rho*c*Gom*R0*Fs*Sears    # Formule simplifiée donnant la force en fonction des expresions du test précédent
 
-            if ind == 1:
-                la = 0.2               # exposant du modèle de Lowson
-                #   N.B. Le modèle de Lowson est un modèle exponential de décroissance en
-                #   amplitude des harmoniques de charge, modèle palliatif quand on ne les
-                #   connaît pas. Il se fonde sur l'observation que, dans beaucoup de cas de
-                #   figure, la décroissance en amplitude des harmoniques de charge est
-                #   proche d'une loi exponentielle. Mais on n'a aucune indication sur la
-                #   phase, ce qui est discutable quand plusieurs harmoniques contribuent
-                #   notablement.
-                for ss in range(sm+1):
-                    F[ss] = np.exp(-la*(ss))*np.exp(1j*np.pi*random())        # phase aléatoire
+                bes = (scipy.special.jv(m*B-ss, m*B*M*np.sin(theo)))*np.ones(N1+1)
+                croc = np.cos(gam)*np.cos(theo)-(m*B-ss)*np.sin(gam)/(m*M*B)
+                cro = croc*np.exp(1j*(m*B-ss)*(phio-np.pi/2))
+                ssig += Fs*cro*bes
 
-                for ss in range(s1, s2+1):
-                    Fs = F[abs(ss)]
-                    bes = (scipy.special.jv(m*B-ss, m*B*M*np.sin(theo)))*np.ones(N1+1)
-                    croc = np.cos(gam)*np.cos(theo)-(m*B-ss)*np.sin(gam)/(m*M*B)
-                    cro = croc*np.exp(1j*(m*B-ss)*(phio-np.pi/2))
-                    ssig += Fs*cro*bes
+            Pac = cst*ssig  # pression acoustique locale
 
-            else:
-                #   Modèle simplifié d'harmoniques de charge pour une interaction
-                #   potentielle avec un bras cylindrique. 3 paramètres ajustables:
-                ai = 0.1
-                ar = 0.17
-                b = 4
-                # Attention: ce modèle vaut pour un arbre de transmission aligné sur
-                # l'axe des X négatifs.
-                for ss in range(s1, s2+1):
-                    if ss == 0:
-                        Fs = 5    # pour la charge stationnaire
-                    else:
-                        Fs = (ar-1j*ai)*(-1)**ss*ss*np.exp(-ss/b)
-
-                    arg = 0.5*c*ss/R0
-                    Sears = np.exp(1j*arg*(1-0.5*np.pi*np.pi/(1+2*np.pi*arg)))/np.sqrt(complex(1+2*np.pi*arg, 0))
-                    Fs = np.pi*rho*c*Gom*R0*Fs*Sears    # Formule simplifiée donnant la force en fonction des expresions du test précédent
-
-                    bes = (scipy.special.jv(m*B-ss, m*B*M*np.sin(theo)))*np.ones(N1+1)
-                    croc = np.cos(gam)*np.cos(theo)-(m*B-ss)*np.sin(gam)/(m*M*B)
-                    cro = croc*np.exp(1j*(m*B-ss)*(phio-np.pi/2))
-                    ssig += Fs*cro*bes
-
-            Pac = cst*ssig                 # pression acoustique locale
-
-            Int0 += abs(Pac)*abs(Pac)/(rho*c0)*function_dBA((jraie+1)*Gom/2/np.pi)      # Intensité sonore locale avec pondération dBA
+            Int0 += abs(Pac)*abs(Pac)/(rho*c0)*function_dBA((jraie+1)*Gom/2/np.pi)  # Intensité sonore locale avec pondération dBA
 
         return Int0
 
-    def noise(self, size_x, size_y, granularity):
+    def noise(self, size_x, size_y, granularity, dist_calc_noise):
+        # Create the coordonates coordinates of the map
         _, y_mat = np.meshgrid(np.zeros(size_x), np.arange(size_y-1, -1, -1))
+        y_mat = y_mat*granularity + granularity/2
         x_mat, _ = np.meshgrid(np.arange(0, size_x), np.zeros(size_y))
+        x_mat = x_mat*granularity + granularity/2
 
-        x = x_mat*granularity + granularity/2 - self.x
-        y = y_mat*granularity + granularity/2 - self.y
-        z = np.zeros((size_y, size_x)) - self.height
+        # Calculate just a part of the map, defined by the dist_calc_noise
+        ind_x_min = max(0, int((self.x - dist_calc_noise/2)//granularity))
+        ind_x_max = min(size_x-1, int((self.x + dist_calc_noise/2)//granularity))
+
+        ind_y_min = size_y - min(size_y, int((self.y + dist_calc_noise/2)//granularity))
+        ind_y_max = size_y - max(0, int((self.y - dist_calc_noise/2)//granularity))
+
+        x_mat = x_mat[ind_y_min:ind_y_max, ind_x_min:ind_x_max]
+        y_mat = y_mat[ind_y_min:ind_y_max, ind_x_min:ind_x_max]
+
+        y_mat = y_mat.flatten() - self.y
+        x_mat = x_mat.flatten() - self.x
+        vec = np.vstack((x_mat, y_mat))
+
+        # Change the reference with a translation and a rotation
+        X_dir_drone = self.dest_x - self.x
+        Y_dir_drone = self.dest_y - self.y
+        N_drone = np.sqrt(X_dir_drone*X_dir_drone+Y_dir_drone*Y_dir_drone)
+        if N_drone == 0:
+            angle = 0
+        else:
+            C = X_dir_drone/N_drone
+            S = -Y_dir_drone
+            angle = np.sign(S)*np.arccos(C)
+
+        mat_r = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+
+        vec_trans = np.dot(mat_r, vec)
+        x = vec_trans[0].reshape((ind_y_max - ind_y_min, ind_x_max - ind_x_min))
+        y = vec_trans[1].reshape((ind_y_max - ind_y_min, ind_x_max - ind_x_min))
+
+        # Transform the new euclidian coordinates into spherical coordinates
+        z = np.zeros((ind_y_max - ind_y_min, ind_x_max - ind_x_min)) - self.height
         r = np.sqrt(x*x + y*y + z*z)
-        theta = np.arccos(z/r)*180 / np.pi
-        phi = np.arctan2(y, x)*180 / np.pi
+        x = np.where(x == 0, 1e-7, x)
+        r = np.where(r == 0, 1e-7, r)
+        theta = np.arccos(z/r)
+        phi = np.arctan(y/x)
 
+        # Calculate the noise for each point
         noise_loc = np.array([[self.base_noise[int(p), int(t)] for p, t in zip(line_phi, line_theta)] for line_phi, line_theta in zip(phi, theta)])
-
-        noise = noise_loc/r/r
+        noise_loc = noise_loc/r/r
+        noise = np.ones((size_y, size_x))*1e-15
+        noise[ind_y_min:ind_y_max, ind_x_min:ind_x_max] = noise_loc
 
         return noise
 

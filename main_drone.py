@@ -39,4 +39,5 @@ def main_drone(dict_setup):
 if __name__ == '__main__':
     with open('setup.json') as file:
         dict_setup = json.load(file)
+
     main_drone(dict_setup)

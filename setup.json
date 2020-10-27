@@ -7,6 +7,13 @@
     "nb_drone": 1000,
     "horizontal_speed": 7,
     "vertical_speed": 4,
+    "nb_pale": 2,
+    "vit_rotor": 4000,
+    "dict_mod_acoust": {
+                        "ai": 0.1,
+                        "ar": 0.17,
+                        "b": 4
+                        },
     "height_flight": 60,
     "range_weight": [0.1, 3.5],
     "weight_drone": 1,
@@ -28,5 +35,6 @@
     "cap_bat": 1000,
     "horizontal_power": 250,
     "vertical_power": 300,
-    "granularity_noise": 75
+    "granularity_noise": 75,
+    "dist_calc_noise": 5000
 }
