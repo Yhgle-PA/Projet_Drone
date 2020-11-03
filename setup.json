@@ -5,10 +5,12 @@
     "y_max": 11500,
     "name_pict": "lyon.PNG",
     "nb_drone": 1000,
-    "horizontal_speed": 7,
-    "vertical_speed": 4,
+    "horizontal_speed": 10,
+    "vertical_speed": 5,
     "nb_pale": 2,
     "vit_rotor": 4000,
+    "corde_pale": 0.03,
+    "ray_eq_drone": 0.15,
     "dict_mod_acoust": {
                         "ai": 0.1,
                         "ar": 0.17,
@@ -32,9 +34,9 @@
                         ],
     "nb_order_day": 20000,
     "recharge_power": 10000,
-    "cap_bat": 1000,
-    "horizontal_power": 250,
-    "vertical_power": 300,
+    "cap_bat": 600,
+    "horizontal_power": 600,
+    "vertical_power": 900,
     "granularity_noise": 75,
     "dist_calc_noise": 5000
 }
