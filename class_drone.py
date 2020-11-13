@@ -20,6 +20,8 @@ class Drone():
         self.delivery_time = dict_setup["delivery_time"]
         self.nb_pale = dict_setup["nb_pale"]
         self.vit_rotor = dict_setup["vit_rotor"]
+        self.ray_eq_drone = dict_setup["ray_eq_drone"]
+        self.corde_pale = dict_setup["corde_pale"]
         self.dict_mod_acoust = dict_setup["dict_mod_acoust"]
         self.timer_delivery = None
         self.flying_time_tot = 0
@@ -41,7 +43,7 @@ class Drone():
         self.base_noise = None
 
     def move(self, dt):
-        if self.cap_bat < 0:
+        if self.cap_bat_act < 0:
             raise Exception('No more battery for a drone')
 
         if self.state == 'Deliver':
@@ -101,7 +103,7 @@ class Drone():
                 raise Exception('No cases should be there')
 
             if self.x == self.dest_x and self.y == self.dest_y and self.height == 0 and (self.state == 'Go' or self.state == 'Back'):
-                # Check if the drone arrived to the delivery place or to the base
+                # Check if the drone is arrived to the delivery place or to the base
                 if self.dest_x == self.base_x and self.dest_y == self.base_y:
                     self.state = 'Back to Base'
                 else:
@@ -163,11 +165,11 @@ class Drone():
         B = self.nb_pale   # nombre de pales du rotor
         Gom = self.vit_rotor    # vitesse de rotation du rotor en tours par minute
         Gom = Gom*2*np.pi/60    # pulsation associée
-        R0 = 0.15          # rayon équivalent
+        R0 = self.ray_eq_drone  # rayon équivalent
         M = Gom*R0/c0      # nombre de Mach tangentiel en R0
         gam = 45           # calage des pales en degrés
         gam = np.pi*gam/180
-        c = 0.03           # corde des pales(en R0)
+        c = self.corde_pale     # corde des pales(en R0)
 
         #   BOUCLE SUR LES HARMONIQUES DE BRUIT
         #   ***********************************
@@ -216,7 +218,7 @@ class Drone():
 
             Pac = cst*ssig  # pression acoustique locale
 
-            Int0 += abs(Pac)*abs(Pac)/(rho*c0)*function_dBA((jraie+1)*Gom/2/np.pi)  # Intensité sonore locale avec pondération dBA
+            Int0 += abs(Pac)*abs(Pac)/(rho*c0)*function_dBA((jraie+1)*Gom*B/2/np.pi)  # Intensité sonore locale avec pondération dBA
 
         return Int0
 
