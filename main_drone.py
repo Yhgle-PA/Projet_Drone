@@ -14,6 +14,8 @@ def main_drone(dict_setup):
 
     for i in range(time_tot_simu//dict_setup["dt"]):
         t = i*dict_setup["dt"] + dict_setup["time_simu"][0]*3600
+        if i % 30 == 0:
+            print(t/3600)
         for _ in range(number_order(dict_setup, t)):
             x, y = destinations.random()
             while abs(x - dict_setup["x_base"]) < 5 and abs(y - dict_setup["y_max"]) < 5:
@@ -25,13 +27,14 @@ def main_drone(dict_setup):
         base.launch_order()
         base.move_all()
         base.check_arrived_order()
-        base.plot_noise()
-        base.plot_drone(t)
+        #base.plot_noise()
+        #base.plot_drone(t)
 
     print('Temps total de vol ', sum([elem.flying_time_tot for elem in base.list_drone])/3600, ' heures')
     print('Energy Total ', base.energy_tot_consumed/1000, ' kWh')
 
     base.plot_waiting_order()
+    base.plot_energy()
 
     base.save_json('base.json')
 
