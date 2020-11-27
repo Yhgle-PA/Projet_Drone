@@ -41,7 +41,7 @@ class LaunchingBase():
         self.axes_noise.set_ylim(0, self.y_max)
         self.line_noise = self.axes_noise.imshow(np.zeros((self.y_max//self.granularity_noise, self.x_max//self.granularity_noise)), extent=[0, self.x_max, 0, self.y_max], cmap=plt.cm.Blues, vmin=30, vmax=75)
         plt.colorbar(self.line_noise)
-        
+
         self.average_noise = np.zeros((self.y_max//self.granularity_noise, self.x_max//self.granularity_noise))
         self.iter = (dict_setup["time_simu"][1] - dict_setup["time_simu"][0])*3600//dict_setup["dt"]
 
@@ -120,10 +120,10 @@ class LaunchingBase():
         plt.xlabel("Temps de livraison (s)")
         plt.ylabel("Proportion")
         plt.show()
-        
+
     def plot_energy(self):
         delta = int(30*60/self.dt)
-        E = [(self.energy[k] - self.energy[k-1])/0.5 for k in range(1, len(self.energy), delta)]
+        E = [(self.energy[k] - self.energy[k-delta])/0.5 for k in range(delta, len(self.energy), delta)]
         t = [7 + 0.5*k for k in range(len(E))]
         plt.figure()
         plt.bar(t, np.array(E)/1000, align='edge')
@@ -131,7 +131,7 @@ class LaunchingBase():
         plt.xlabel("Heure")
         plt.ylabel("Puissance moyenne (kW)")
         plt.show()
-        
+
         # plt.figure()
         # E = [(self.energy[k] - self.energy[k-1])*3600/30/1000 for k in range(1, len(self.energy))]
         # t = [7 + 30/3600*k for k in range(len(E))]
@@ -140,7 +140,7 @@ class LaunchingBase():
         # plt.xlim(7,24)
         # plt.ylabel("Puissance électrique (kW)")
         # plt.show()
-        
+
         plt.figure()
         t = [7 + 30/3600*k for k in range(len(self.energy))]
         plt.plot(t, np.array(self.energy)/1000)
